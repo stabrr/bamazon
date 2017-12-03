@@ -22,7 +22,7 @@ function displayProducts() {
     var query = "select products.item_id, products.product_name, products.price FROM products";
     connection.query(query, function(err, res) {
         for (var i = 0; i < res.length; i++) {
-            console.log("Product ID: " + res[i].item_id + " || Product: " + res[i].product_name + " || Price: " + res[i].price);
+            console.log("Product ID: " + res[i].item_id + "    " + res[i].product_name + "      Price: " + res[i].price);
         }
         buyProduct();
     });
@@ -55,22 +55,39 @@ function buyProduct() {
         ])
         .then(function(answer) {
 
-            console.log(answer.productID);
-            console.log(answer.quantity);
+            // console.log(answer.productID);
+            // console.log(answer.quantity);
             checkAvailability(answer.productID, answer.quantity);
 
         });
 };
 
-function checkAvailability(prodID, quantity) {
-    var query = "SELECT products.stock_quantity FROM products WHERE ?";
-    connection.query(query, { item_id: prodID }, function(err, res) {
-        console.log(res[0].stock_quantity);
-        if ((res[0].stock_quantity) < quantity) {
-            console.log("sorry not we do not have enough to sell you!");
-        } else {
-            console.log("sure " + ((res[0].stock_quantity) - quantity));
-        }
+function updateInventory(prodID, quantity) {
+    var query = "UPDATE products SET stock_quantity = ? WHERE item_id = ?";
+    connection.query(query, [quantity, prodID], function(err, res) {
+        console.log("updated");
+        // console.log(err);
     });
+}
+
+function checkAvailability(prodID, quantity) {
+    var query = "SELECT products.stock_quantity, price FROM products WHERE ?";
+    connection.query(query, { item_id: prodID }, function(err, res) {
+        // console.log(res[0].stock_quantity);
+        if ((res[0].stock_quantity) < quantity) {
+            console.log("Insufficient quantity!");
+        } else {
+            newInventory = (res[0].stock_quantity) - quantity;
+            // console.log("sure " + newInventory);
+
+            console.log("total owed: $" + (quantity * (res[0].price)).toFixed(2));
+            updateInventory(prodID, newInventory);
+
+        }
+        connection.end(function(err) {
+            // The connection is terminated now
+        });
+    });
+
 
 }
