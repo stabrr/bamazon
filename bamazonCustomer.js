@@ -22,7 +22,7 @@ function displayProducts() {
     var query = "select products.item_id, products.product_name, products.price FROM products";
     connection.query(query, function(err, res) {
         for (var i = 0; i < res.length; i++) {
-            console.log("Product ID: " + res[i].item_id + "    " + res[i].product_name + "      Price: " + res[i].price);
+            console.log("Product ID: " + res[i].item_id + "    " + res[i].product_name + "      Price: $" + (res[i].price).toFixed(2));
         }
         buyProduct();
     });
@@ -65,7 +65,7 @@ function buyProduct() {
 function updateInventory(prodID, quantity) {
     var query = "UPDATE products SET stock_quantity = ? WHERE item_id = ?";
     connection.query(query, [quantity, prodID], function(err, res) {
-        console.log("updated");
+        // console.log("updated");
         // console.log(err);
     });
 }
