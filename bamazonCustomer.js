@@ -1,6 +1,8 @@
+//requires NPM mysql, and inquirer
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 
+//mySQL connection
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -8,8 +10,8 @@ var connection = mysql.createConnection({
     // Your username
     user: "root",
 
-    // Your password
-    password: "***REMOVED***",
+    // password blanked out
+    password: "xxxxxxxxxxxx",
     database: "bamazon"
 });
 
@@ -18,6 +20,7 @@ connection.connect(function(err) {
     displayProducts();
 });
 
+//function to display all products
 function displayProducts() {
     var query = "select products.item_id, products.product_name, products.price FROM products";
     connection.query(query, function(err, res) {
@@ -28,6 +31,7 @@ function displayProducts() {
     });
 }
 
+//function to query what to buy
 function buyProduct() {
     inquirer
         .prompt([{
@@ -55,13 +59,13 @@ function buyProduct() {
         ])
         .then(function(answer) {
 
-            // console.log(answer.productID);
-            // console.log(answer.quantity);
+
+            // use the information gathered to check availablty
             checkAvailability(answer.productID, answer.quantity);
 
         });
 };
-
+//updates inventory using the item_id and the amount that should remain
 function updateInventory(prodID, quantity) {
     var query = "UPDATE products SET stock_quantity = ? WHERE item_id = ?";
     connection.query(query, [quantity, prodID], function(err, res) {
@@ -70,15 +74,17 @@ function updateInventory(prodID, quantity) {
     });
 }
 
+//checks availability if there is enough inventory than call update inventory
+//if not enough inventory than state Insufficient quantity
 function checkAvailability(prodID, quantity) {
     var query = "SELECT products.stock_quantity, price FROM products WHERE ?";
     connection.query(query, { item_id: prodID }, function(err, res) {
-        // console.log(res[0].stock_quantity);
+
         if ((res[0].stock_quantity) < quantity) {
             console.log("Insufficient quantity!");
         } else {
             newInventory = (res[0].stock_quantity) - quantity;
-            // console.log("sure " + newInventory);
+
 
             console.log("total owed: $" + (quantity * (res[0].price)).toFixed(2));
             updateInventory(prodID, newInventory);
