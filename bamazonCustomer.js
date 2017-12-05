@@ -20,6 +20,7 @@ connection.connect(function(err) {
     displayProducts();
 });
 
+
 //function to display all products
 function displayProducts() {
     var query = "select products.item_id, products.product_name, products.price FROM products";
